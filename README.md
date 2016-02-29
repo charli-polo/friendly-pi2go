@@ -29,9 +29,19 @@ Jessie is too big (especially for 4Go SD card). Make sure your are battery power
 - Add support for python2: http://ipython.readthedocs.org/en/latest/install/kernel_install.html
 - Have jupyter on startup (https://www.raspberrypi.org/documentation/linux/usage/rc-local.md)
 
+## PythonPath ##
+- pi2go.py and other modules in /home/pi/libs
+- Add code in .bashrc of pi user (it's loaded by root .bashrc)
+# PYTHON PATH
+export PYTHONPATH="${PYTHONPATH}:/home/pi/libs"
+- Jupyter handles path differently via ipython so we must add it in ipython startup dir: 
+/root/.ipython/profile_default/startup/00-pythonpath.py
+import sys
+sys.path.append('/home/pi/libs')
+
 ## To Do ##
 - Use https (test for perf) on Jupyter ?
-- configure dir and python path
+
 - make the libs python3 compatible
 - Change pi user (issue now with pi2go)
 - call back example
