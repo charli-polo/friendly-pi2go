@@ -49,3 +49,9 @@ sys.path.append('/home/pi/libs')
 ## Not done ##
 might be an issue ?
 - sudo nano /etc/modules and add “i2c-dev” as the last line
+
+## Libraries do consider ##
+- RPI.GPIO
+- RPIO
+- gpiocrust
+
