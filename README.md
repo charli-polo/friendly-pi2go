@@ -28,6 +28,10 @@ Jessie is too big (especially for 4Go SD card). Make sure your are battery power
 - configure jupyter notebook server (http://jupyter-notebook.readthedocs.org/en/latest/public_server.html)
 - Add support for python2: http://ipython.readthedocs.org/en/latest/install/kernel_install.html
 - Have jupyter on startup (https://www.raspberrypi.org/documentation/linux/usage/rc-local.md)
+- install smbus for python3
+sudo apt-get update
+sudo apt-get install python3-smbus
+
 
 ## PythonPath ##
 - pi2go.py and other modules in /home/pi/libs
