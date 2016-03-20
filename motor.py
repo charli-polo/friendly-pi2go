@@ -123,7 +123,7 @@ class Motor:
 
         # references for turtle like movement
         self._time_ref_distance = 6.0 # Time for a unit of distance
-        self._time_ref_spin = 2.0 # Time for a complete spin
+        self._time_ref_spin = 2.475 # Time for a complete spin
 
     def stop(self):
         """stop(): Stop the motor"""
