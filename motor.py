@@ -115,82 +115,93 @@ class Motor:
         self._b.start(0)
 
         self.speed = speed
-        self.tuning = 4
+
+        # Motor correction
+        # If your robot goes to the right, put a positiv value.
+        # If your robot goes to the left, put a negativ value.
+        self.tuning = 0.1
+
+        # references for turtle like movement
+        self._time-ref-distance = 3.0 # Time for a unit of distance
+        self._time-ref-spin = 1.0 # Time for a complete spin
 
     def stop(self):
+        """stop(): Stop the motor"""
         self._p.ChangeDutyCycle(0)
         self._q.ChangeDutyCycle(0)
         self._a.ChangeDutyCycle(0)
         self._b.ChangeDutyCycle(0)
 
+    def move(self, distance, speed=None):
+        """move(distance, speed): move a certain number of steps (can be negativ)"""
+        speed = speed if speed else self.speed
+        self.goBoth(speed)
+        time.sleep(self._time-ref-distance)
+        self.stop()
+
+    def rotate(self, angle, speed=None):
+        """rotate(angle, speed): rotate for angle degrees (can be negativ)"""
+        speed = speed if speed else self.speed
+        if angle >= 0:
+            self.spinRight(speed)
+        else:
+            self.spinLeft(speed)
+        time.sleep(abs(angle)/360 * self._time-ref-spin)
+        self.stop()
+
+    def turnRight(self, speed=None):
+        speed = speed if speed else self.speed
+        self.rotate(90, speed)
+
+    def turnLeft(self, speed=None):
+        speed = speed if speed else self.speed
+        self.rotate(-90, speed)
+
+    def turnAround(self, speed=None):
+        speed = speed if speed else self.speed
+        self.rotate(180, speed)
 
     def forward(self, speed = None):
         """forward(speed): Sets both motors to move forward at speed. 0 <= speed <= 100"""
         speed = speed if speed else self.speed
-        self.go(speed - self.tuning , speed)
+        self.go(speed,speed)
 
     def reverse(self, speed = None):
         """reverse(speed): Sets both motors to reverse at speed. 0 <= speed <= 100"""
         speed = speed if speed else self.speed
-        self.go(-speed + self.tuning , -speed)
+        self.go(-speed, -speed)
 
     def spinLeft(self, speed = None):
         """spinLeft(speed): Sets motors to turn opposite directions at speed. 0 <= speed <= 100"""
         speed = speed if speed else self.speed
-        self.go(-speed + self.tuning , speed)
+        self.go(-speed , speed)
 
     def spinRight(self, speed = None):
         """spinRight(speed): Sets motors to turn opposite directions at speed. 0 <= speed <= 100"""
         speed = speed if speed else self.speed
-        self.go(speed - self.tuning , -speed)
-
-
-    def spinLeft2(self, speed = None):
-        """spinLeft(speed): Sets motors to turn opposite directions at speed. 0 <= speed <= 100"""
-        speed = speed if speed else self.speed
-
-        self._p.ChangeDutyCycle(0)
-        self._q.ChangeDutyCycle(speed)
-        self._a.ChangeDutyCycle(speed)
-        self._b.ChangeDutyCycle(0)
-        self._q.ChangeFrequency(speed + 5)
-        self._a.ChangeFrequency(speed + 5)
-
-    def spinRight2(self, speed = None):
-        """spinRight(speed): Sets motors to turn opposite directions at speed. 0 <= speed <= 100"""
-        speed = speed if speed else self.speed
-
-        self._p.ChangeDutyCycle(speed)
-        self._q.ChangeDutyCycle(0)
-        self._a.ChangeDutyCycle(0)
-        self._b.ChangeDutyCycle(speed)
-        self._p.ChangeFrequency(speed + 5)
-        self._b.ChangeFrequency(speed + 5)
-
+        self.go(speed, -speed)
 
     def turnForward(self, leftSpeed, rightSpeed):
         """turnForward(leftSpeed, rightSpeed): Moves forwards in an arc by setting different speeds. 0 <= leftSpeed,rightSpeed <= 100"""
-
-        self._p.ChangeDutyCycle(leftSpeed)
-        self._q.ChangeDutyCycle(0)
-        self._a.ChangeDutyCycle(rightSpeed)
-        self._b.ChangeDutyCycle(0)
-        self._p.ChangeFrequency(leftSpeed + 5)
-        self._a.ChangeFrequency(rightSpeed + 5)
+        self.go(leftSpeed, rightSpeed)
 
     def turnReverse(self, leftSpeed, rightSpeed):
         """turnReverse(leftSpeed, rightSpeed): Moves backwards in an arc by setting different speeds. 0 <= leftSpeed,rightSpeed <= 100"""
+        self.go(-leftSpeed, -rightSpeed)
 
-        self._p.ChangeDutyCycle(0)
-        self._q.ChangeDutyCycle(leftSpeed)
-        self._a.ChangeDutyCycle(0)
-        self._b.ChangeDutyCycle(rightSpeed)
-        self._q.ChangeFrequency(leftSpeed + 5)
-        self._b.ChangeFrequency(rightSpeed + 5)
+    def goBoth(self, speed):
+        """go(speed): controls motors in both directions together with positive/negative speed parameter. -100<= speed <= 100"""
+        if speed<0:
+            self.reverse(abs(speed))
+        else:
+            self.forward(speed)
 
     def go(self, leftSpeed, rightSpeed):
         """go(leftSpeed, rightSpeed): controls motors in both directions independently using different positive/negative speeds. -100<= leftSpeed,rightSpeed <= 100"""
-        # go(leftSpeed + self.tuning, rightSpeed - self.tuning)
+        if self.tuning > 0:
+            leftSpeed = int(leftSpeed * (1 - self.tuning))
+        else:
+            rightSpeed = int(rightSpeed * (1 + self.tuning))
 
         if leftSpeed<0:
             self._p.ChangeDutyCycle(0)
@@ -208,11 +219,3 @@ class Motor:
             self._b.ChangeDutyCycle(0)
             self._a.ChangeDutyCycle(rightSpeed)
             self._p.ChangeFrequency(rightSpeed + 5)
-
-    # go(speed): controls motors in both directions together with positive/negative speed parameter. -100<= speed <= 100
-    def goBoth(self, speed):
-        """go(speed): controls motors in both directions together with positive/negative speed parameter. -100<= speed <= 100"""
-        if speed<0:
-            self.reverse(abs(speed))
-        else:
-            self.forward(speed)
