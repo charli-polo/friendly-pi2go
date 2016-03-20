@@ -122,8 +122,8 @@ class Motor:
         self.tuning = 0.1
 
         # references for turtle like movement
-        self._time_ref_distance = 3.0 # Time for a unit of distance
-        self._time_ref_spin = 1.0 # Time for a complete spin
+        self._time_ref_distance = 6.0 # Time for a unit of distance
+        self._time_ref_spin = 2.0 # Time for a complete spin
 
     def stop(self):
         """stop(): Stop the motor"""
@@ -135,8 +135,11 @@ class Motor:
     def move(self, distance, speed=None):
         """move(distance, speed): move a certain number of steps (can be negativ)"""
         speed = speed if speed else self.speed
-        self.goBoth(speed)
-        time.sleep(self._time_ref_distance)
+        if distance >= 0:
+            self.goBoth(speed)
+        else:
+            self.goBoth(-speed)
+        time.sleep(self._time_ref_distance * abs(distance))
         self.stop()
 
     def rotate(self, angle, speed=None):
@@ -146,7 +149,7 @@ class Motor:
             self.spinRight(speed)
         else:
             self.spinLeft(speed)
-        time.sleep(abs(angle)/360 * self._time_ref_spin)
+        time.sleep(abs(angle)/360.0 * self._time_ref_spin)
         self.stop()
 
     def turnRight(self, speed=None):
