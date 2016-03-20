@@ -2,6 +2,7 @@
 
 from __future__ import print_function
 # Import all necessary libraries
+import time
 # import RPi.GPIO as GPIO, sys, threading, time, os, smbus
 # import pca9685_p3
 # from sgh_PCF8591P_p3 import sgh_PCF8591P

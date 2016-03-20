@@ -23,9 +23,9 @@ class Board:
     R1 = 19
     R2 = 21
 
-    def init(self):
-        global p, q, a, b, pwm, pcfADC, PGType
-        global irFL, irFR, irMID, lineLeft, lineRight
+    def __init__(self):
+        # global p, q, a, b, pwm, pcfADC, PGType
+        # global irFL, irFR, irMID, lineLeft, lineRight
         GPIO.setwarnings(False)
 
         self.PGType = self.PGFull
@@ -95,114 +95,119 @@ class Board:
 
 class Motor:
     def __init__(self, speed):
-        self._board = Board
+        self._board = Board()
+
         #use pwm on inputs so motors don't go too fast
-        GPIO.setup(self._board.L1, GPIO.OUT)
-        self._p = GPIO.PWM(self._board.L1, 20)
+        GPIO.setup(Board.L1, GPIO.OUT)
+        self._p = GPIO.PWM(Board.L1, 20)
         self._p.start(0)
 
-        GPIO.setup(self._board.L2, GPIO.OUT)
-        self._q = GPIO.PWM(self._board.L2, 20)
+        GPIO.setup(Board.L2, GPIO.OUT)
+        self._q = GPIO.PWM(Board.L2, 20)
         self._q.start(0)
 
-        GPIO.setup(self._board.R1, GPIO.OUT)
-        self._a = GPIO.PWM(R1, 20)
+        GPIO.setup(Board.R1, GPIO.OUT)
+        self._a = GPIO.PWM(Board.R1, 20)
         self._a.start(0)
 
-        GPIO.setup(self._board.R2, GPIO.OUT)
-        self._b = GPIO.PWM(R2, 20)
+        GPIO.setup(Board.R2, GPIO.OUT)
+        self._b = GPIO.PWM(Board.R2, 20)
         self._b.start(0)
 
         self.speed = speed
-        self.tuning = 0
+        self.tuning = 4
 
     def stop(self):
-        self.p.ChangeDutyCycle(0)
-        self.q.ChangeDutyCycle(0)
-        self.a.ChangeDutyCycle(0)
-        self.b.ChangeDutyCycle(0)
+        self._p.ChangeDutyCycle(0)
+        self._q.ChangeDutyCycle(0)
+        self._a.ChangeDutyCycle(0)
+        self._b.ChangeDutyCycle(0)
 
-    # forward(speed): Sets both motors to move forward at speed. 0 <= speed <= 100
-    def forward(self, speed):
-        self.p.ChangeDutyCycle(speed)
-        self.q.ChangeDutyCycle(0)
-        self.a.ChangeDutyCycle(speed)
-        self.b.ChangeDutyCycle(0)
-        self.p.ChangeFrequency(speed + 5)
-        self.a.ChangeFrequency(speed + 5)
 
-    # reverse(speed): Sets both motors to reverse at speed. 0 <= speed <= 100
-    def reverse(self, speed):
-        self.p.ChangeDutyCycle(0)
-        self.q.ChangeDutyCycle(speed)
-        self.a.ChangeDutyCycle(0)
-        self.b.ChangeDutyCycle(speed)
-        self.q.ChangeFrequency(speed + 5)
-        self.b.ChangeFrequency(speed + 5)
+    def forward(self, speed = None):
+        """forward(speed): Sets both motors to move forward at speed. 0 <= speed <= 100"""
+        speed = speed if speed else self.speed
+        self.go(speed - self.tuning , speed)
+
+    def reverse(self, speed = None):
+        """reverse(speed): Sets both motors to reverse at speed. 0 <= speed <= 100"""
+        speed = speed if speed else self.speed
+        self.go(-speed + self.tuning , -speed)
 
     def spinLeft(self, speed = None):
         """spinLeft(speed): Sets motors to turn opposite directions at speed. 0 <= speed <= 100"""
         speed = speed if speed else self.speed
-
-        self.p.ChangeDutyCycle(0)
-        self.q.ChangeDutyCycle(speed)
-        self.a.ChangeDutyCycle(speed)
-        self.b.ChangeDutyCycle(0)
-        self.q.ChangeFrequency(speed + 5)
-        self.a.ChangeFrequency(speed + 5)
+        self.go(-speed + self.tuning , speed)
 
     def spinRight(self, speed = None):
         """spinRight(speed): Sets motors to turn opposite directions at speed. 0 <= speed <= 100"""
         speed = speed if speed else self.speed
+        self.go(speed - self.tuning , -speed)
 
-        self.p.ChangeDutyCycle(speed)
-        self.q.ChangeDutyCycle(0)
-        self.a.ChangeDutyCycle(0)
-        self.b.ChangeDutyCycle(speed)
-        self.p.ChangeFrequency(speed + 5)
-        self.b.ChangeFrequency(speed + 5)
+
+    def spinLeft2(self, speed = None):
+        """spinLeft(speed): Sets motors to turn opposite directions at speed. 0 <= speed <= 100"""
+        speed = speed if speed else self.speed
+
+        self._p.ChangeDutyCycle(0)
+        self._q.ChangeDutyCycle(speed)
+        self._a.ChangeDutyCycle(speed)
+        self._b.ChangeDutyCycle(0)
+        self._q.ChangeFrequency(speed + 5)
+        self._a.ChangeFrequency(speed + 5)
+
+    def spinRight2(self, speed = None):
+        """spinRight(speed): Sets motors to turn opposite directions at speed. 0 <= speed <= 100"""
+        speed = speed if speed else self.speed
+
+        self._p.ChangeDutyCycle(speed)
+        self._q.ChangeDutyCycle(0)
+        self._a.ChangeDutyCycle(0)
+        self._b.ChangeDutyCycle(speed)
+        self._p.ChangeFrequency(speed + 5)
+        self._b.ChangeFrequency(speed + 5)
 
 
     def turnForward(self, leftSpeed, rightSpeed):
         """turnForward(leftSpeed, rightSpeed): Moves forwards in an arc by setting different speeds. 0 <= leftSpeed,rightSpeed <= 100"""
 
-        self.p.ChangeDutyCycle(leftSpeed)
-        self.q.ChangeDutyCycle(0)
-        self.a.ChangeDutyCycle(rightSpeed)
-        self.b.ChangeDutyCycle(0)
-        self.p.ChangeFrequency(leftSpeed + 5)
-        self.a.ChangeFrequency(rightSpeed + 5)
+        self._p.ChangeDutyCycle(leftSpeed)
+        self._q.ChangeDutyCycle(0)
+        self._a.ChangeDutyCycle(rightSpeed)
+        self._b.ChangeDutyCycle(0)
+        self._p.ChangeFrequency(leftSpeed + 5)
+        self._a.ChangeFrequency(rightSpeed + 5)
 
     def turnReverse(self, leftSpeed, rightSpeed):
         """turnReverse(leftSpeed, rightSpeed): Moves backwards in an arc by setting different speeds. 0 <= leftSpeed,rightSpeed <= 100"""
 
-        self.p.ChangeDutyCycle(0)
-        self.q.ChangeDutyCycle(leftSpeed)
-        self.a.ChangeDutyCycle(0)
-        self.b.ChangeDutyCycle(rightSpeed)
-        self.q.ChangeFrequency(leftSpeed + 5)
-        self.b.ChangeFrequency(rightSpeed + 5)
+        self._p.ChangeDutyCycle(0)
+        self._q.ChangeDutyCycle(leftSpeed)
+        self._a.ChangeDutyCycle(0)
+        self._b.ChangeDutyCycle(rightSpeed)
+        self._q.ChangeFrequency(leftSpeed + 5)
+        self._b.ChangeFrequency(rightSpeed + 5)
 
     def go(self, leftSpeed, rightSpeed):
         """go(leftSpeed, rightSpeed): controls motors in both directions independently using different positive/negative speeds. -100<= leftSpeed,rightSpeed <= 100"""
         # go(leftSpeed + self.tuning, rightSpeed - self.tuning)
 
         if leftSpeed<0:
-            self.p.ChangeDutyCycle(0)
-            self.q.ChangeDutyCycle(abs(leftSpeed))
-            self.q.ChangeFrequency(abs(leftSpeed) + 5)
+            self._p.ChangeDutyCycle(0)
+            self._q.ChangeDutyCycle(abs(leftSpeed))
+            self._q.ChangeFrequency(abs(leftSpeed) + 5)
         else:
-            self.q.ChangeDutyCycle(0)
-            self.p.ChangeDutyCycle(leftSpeed)
-            self.p.ChangeFrequency(leftSpeed + 5)
+            self._q.ChangeDutyCycle(0)
+            self._p.ChangeDutyCycle(leftSpeed)
+            self._p.ChangeFrequency(leftSpeed + 5)
         if rightSpeed<0:
-            self.a.ChangeDutyCycle(0)
-            self.b.ChangeDutyCycle(abs(rightSpeed))
-            self.p.ChangeFrequency(abs(rightSpeed) + 5)
+            self._a.ChangeDutyCycle(0)
+            self._b.ChangeDutyCycle(abs(rightSpeed))
+            self._p.ChangeFrequency(abs(rightSpeed) + 5)
         else:
-            self.b.ChangeDutyCycle(0)
-            self.a.ChangeDutyCycle(rightSpeed)
-            self.p.ChangeFrequency(rightSpeed + 5)
+            self._b.ChangeDutyCycle(0)
+            self._a.ChangeDutyCycle(rightSpeed)
+            self._p.ChangeFrequency(rightSpeed + 5)
 
     # go(speed): controls motors in both directions together with positive/negative speed parameter. -100<= speed <= 100
     def goBoth(self, speed):
